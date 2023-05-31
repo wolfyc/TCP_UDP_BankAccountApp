@@ -55,7 +55,7 @@ void save_operation(Account* account, const char* type_operation, double amount)
     time_t current_time = time(NULL);
     strftime(operation->date_operation, sizeof(operation->date_operation), "%Y-%m-%d %H:%M:%S", localtime(&current_time));
     operation->operation_amount = amount;
-    account->Operation_nbr++;
+    account->Operation_nbr++;}
 
 Account* find_account_by_ID(int id_client, int id_account, const char* password) {
     for (int i = 0; i < account_db_nbr; i++) {
