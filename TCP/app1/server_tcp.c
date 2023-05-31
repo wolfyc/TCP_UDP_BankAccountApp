@@ -7,10 +7,13 @@
             #include <unistd.h>
             #include <netinet/in.h>
 
+            #include "header.h"
+
           #define MAXPENDING 5    /* Max connection requests */
           #define BUFFSIZE 1024
-          #define port 8080
+          #define port 8081
           void Die(char *mess) { perror(mess); exit(1); }
+          
           
           void HandleClient(int sock) {
             char buffer[BUFFSIZE];
@@ -22,11 +25,12 @@
             }
             printf("buffer Message received is: %s\n", buffer);
             /* Send bytes and check for more incoming data in loop */
-            while (received > 0) {
+         while(received > 0){
               /* Send back received data */
               if (send(sock, buffer, received, 0) != received) {
                 Die("Failed to send bytes to client");
               }
+              buffer[received] = '\0';
               //send(sock,message_client, strlen(message_client), 0);
               printf("\nMessage sent back is : %s\n", buffer);
               /* Check for more data */
@@ -41,11 +45,7 @@
             int serversock, clientsock;
             struct sockaddr_in echoserver, echoclient;
 /*
-            if (argc != 2) {
-              fprintf(stderr, "USAGE: echoserver <port>\n");
-              exit(1);
-            }*/
-
+           
             /* Create the TCP socket */
             if ((serversock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
               Die("Failed to create socket");
@@ -53,7 +53,7 @@
             /* Construct the server sockaddr_in structure */
             memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
             echoserver.sin_family = AF_INET;                  /* Internet/IP */
-            echoserver.sin_addr.s_addr = INADDR_ANY;//htonl(INADDR_ANY);   /* Incoming addr */
+            echoserver.sin_addr.s_addr = INADDR_ANY;//  /* Incoming addr */
             echoserver.sin_port = htons(port);       /* server port */
             /* Bind the server socket */
             if (bind(serversock, (struct sockaddr *) &echoserver,
