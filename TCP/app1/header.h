@@ -12,7 +12,7 @@
 
 #define MAXPENDING 5    /* Max connection requests */
 #define BUFFSIZE 1024
-#define port 8081
+#define port 8082
 
 
 typedef struct operations_ {
@@ -67,6 +67,9 @@ Account* find_account_by_ID(int id_client, int id_account, const char* password)
 
 int AJOUT(int id_client, int id_account, const char* password, double amount) {
     Account* account = find_account_by_ID(id_client, id_account, password);
+    printf("id_client est %d\n", id_client);
+    printf("id_account est %d\n", id_account);
+    printf("password est %s\n", password);
     if (account) {
         account->balance += amount;
         // Record the operation
@@ -97,7 +100,8 @@ double SOLDE(int id_client, int id_account, const char* password) {
 char* OPERATIONS(int id_client, int id_account, const char* password, char* buffer, size_t buffer_size) {
     Account* account = find_account_by_ID(id_client, id_account, password);
     if (account) {
-        int start = (account->Operation_nbr > 10) ? account->Operation_nbr - 10 : 0;
+        int start;
+        if (account->Operation_nbr > 10) start= account->Operation_nbr - 10; else start = 0;
         buffer[0] = '\0';
         for (int i = start; i < account->Operation_nbr; i++) {
             Operations* operation = &(account->operations[i % 10]);

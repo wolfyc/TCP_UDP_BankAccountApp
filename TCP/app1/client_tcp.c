@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-#define port 8081
+#define port 8082
 #define BUFFSIZE 1024
 
 void Die(char *mess) { perror(mess); exit(1); }
@@ -18,10 +18,10 @@ int main(int argc, char *argv[]) {
   unsigned int echolen;
   int received = 0;
 // Human interface information
-  char *AJOUT = "AJOUT  <id_client  id_compte  password  somme>";
-  char *RETRAIT = "RETRAIT <id_client id_compte password somme>";
-  char *SOLDE = "SOLDE <id_client id_compte password>";
-  char *OPERATIONS = "OPERATIONS <id_client  id_compte  password>";
+  char *AJOUT = "AJOUT  <id_client  id_account  password  amount>";
+  char *RETRAIT = "RETRAIT <id_client id_account password amount>";
+  char *SOLDE = "SOLDE <id_client id_account password>";
+  char *OPERATIONS = "OPERATIONS <id_client  id_account  password>";
   char *hello = "Hello from client !";
 
   /* Create the TCP socket */
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     Die("Failed to connect with server");
   }
   /*Human interface*/
-  printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre compte : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernieres operations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
+  printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre account : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernieres operations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
   
   while (1) {
         printf("\nEnter your request, and please mind the syntaxe above \n");
