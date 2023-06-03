@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-#define port 8082
+#define port 8081
 #define BUFFSIZE 1024
 
 void Die(char *mess) { perror(mess); exit(1); }
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   }
   /*Human interface*/
   printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre account : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernieres operations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
-  
+
   while (1) {
         printf("\nEnter your request, and please mind the syntaxe above \n");
         fgets(buffer, BUFFSIZE, stdin);

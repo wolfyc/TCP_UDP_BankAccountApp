@@ -40,10 +40,9 @@ int main(int argc, char *argv[])
       Die("Failed to accept client connection");
     }
     fprintf(stdout, "Client connected: %s\nWaiting for instructions from client\n", inet_ntoa(echoclient.sin_addr));
-    //HandleClient(clientsock);
     int id_client, id_account;
     const char *password;
-    double amount;
+    int amount;
     char answer[BUFFSIZE];
     int do_while_flag = 1;
     do{
@@ -54,12 +53,13 @@ int main(int argc, char *argv[])
                 break;
             }
             buffer[BUFFSIZE - 1] = '\0'; 
-      // if client sends "QUIT", he gets disconnected
-      if (strcmp(buffer, "kill") == 0) {
-                do_while_flag = 0;
-            }
+      
       char* token = strtok(buffer, " ");
-
+      // if client sends "KILL", he gets disconnected
+      if (strcmp(token, "KILL") == 0) {
+                do_while_flag = 0;
+                printf("client request KILLed\n");
+            }
       if (token != NULL) {
         if (strcmp(token, "AJOUT") == 0) {
             token = strtok(NULL, " ");
@@ -69,13 +69,12 @@ int main(int argc, char *argv[])
             token = strtok(NULL, " ");
             password = token;
             token = strtok(NULL, " ");
-            amount = strtod(token, NULL);
-printf("account balance est %.2lf\n", test.balance);
-          if (AJOUT(id_client, id_account, password, amount)) 
-              strcpy(answer, "OK\n");
-          else 
-              strcpy(answer, "KO\n");
-printf("account balance %.2lf\n", test.balance);
+            amount = atoi(token); //strtod(token, NULL);
+            if (AJOUT(id_client, id_account, password, amount)) 
+                strcpy(answer, "OK\n");
+            else 
+                strcpy(answer, "KO\n");
+
         }else if(strcmp(token, "RETRAIT") == 0){
             token = strtok(NULL, " ");
             id_client = atoi(token);
@@ -85,7 +84,6 @@ printf("account balance %.2lf\n", test.balance);
             password = token;
             token = strtok(NULL, " ");
             amount = strtod(token, NULL);
-
             if (RETRAIT(id_client,id_account,password,amount))
               strcpy(answer, "OK\n");
             else
@@ -94,18 +92,18 @@ printf("account balance %.2lf\n", test.balance);
         }else if(strcmp(token, "SOLDE") == 0) {
             token = strtok(NULL, " ");
             id_client = atoi(token);
-            printf("id_client est %d\n", id_client);
+          
             token = strtok(NULL, " ");
             id_account = atoi(token);
-            printf("id_account est %d\n", id_account);
+          
             token = strtok(NULL, " ");
             password = token;
-            printf("password est %s\n", password);
-            double account_balance = SOLDE(id_client,id_account,password);
-            printf("your account balance is: %.2lf Euro\n", account_balance);
-            if (account_balance >= 0.0){
-              snprintf(answer, BUFFSIZE, "your account balance is: %.2lf Euro\n", account_balance);
-              strcpy(answer, "OK\n");
+            
+            
+            int account_balance = SOLDE(id_client,id_account,password);
+            
+            if (account_balance >= 0){
+              snprintf(answer, BUFFSIZE, "your account balance is: %d Euro\n", account_balance);
             }else
               strcpy(answer, "KO\n");
 
@@ -123,12 +121,11 @@ printf("account balance %.2lf\n", test.balance);
             }
             else
               strcpy(answer, "KO\n");
-        }else
-          strcpy(answer, "KO\n");
+            }else
+              strcpy(answer, "KO\n");
       }
-       // Envoi de la réponse au client
+            // sending back feedback
             send(clientsock, answer, strlen(answer), 0);
-            //send(client_fd, buffer, strlen(buffer), 0); --> send request back
     }while(do_while_flag);
     close(clientsock);
   }
