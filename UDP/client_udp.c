@@ -17,15 +17,15 @@ int main(int argc, char *argv[]) {
   char buffer[BUFFSIZE];
   unsigned int echolen;
   int received = 0;
-// Human interface information
+  // Human interface information
   char *AJOUT = "AJOUT  <id_client  id_account  password  amount>";
   char *RETRAIT = "RETRAIT <id_client id_account password amount>";
   char *SOLDE = "SOLDE <id_client id_account password+space >";
   char *OPERATIONS = "OPERATIONS <id_client  id_account  password+space>";
   char *hello = "Hello from client !";
 
-  /* Create the TCP socket */
-  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+  /* Create the UDP socket */
+  if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
     Die("Failed to create socket");
   }
   /* Construct the server sockaddr_in structure */
@@ -33,23 +33,24 @@ int main(int argc, char *argv[]) {
   echoserver.sin_family = AF_INET;      /* Internet/IP */
   echoserver.sin_addr.s_addr = INADDR_ANY;//inet_addr(argv[1]);  /* IP address */
   echoserver.sin_port = htons(port);       /* server port */
-  /* Establish connection */
-  if (connect(sock,(struct sockaddr *) &echoserver,sizeof(echoserver)) < 0) {
-    Die("Failed to connect with server");
-  }
-  /*Human interface*/
-  printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre account : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernieres operations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
-
+  
   while (1) {
-        printf("\nEnter your request, and please mind the syntaxe above \n");
-        fgets(buffer, BUFFSIZE, stdin);
-        send(sock, buffer, strlen(buffer), 0);
-        printf("Request sent\n");
-        
-        echolen = read(sock, buffer, BUFFSIZE);
-        buffer [echolen ] = '\0';
-        printf("server response %s\n", buffer);
-    }
+    printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre compte : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernières opérations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
+    printf("\nEnter your request, and please mind the syntax above:\n");
+
+    fgets(buffer, BUFFSIZE, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0'; // Remove trailing newline character
+
+    /* Send the request to the server */
+    sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&echoserver, sizeof(echoserver));
+    printf("Request sent\n");
+
+    /* Receive and print the server response */
+    echolen = recvfrom(sock, buffer, BUFFSIZE, 0, NULL, NULL);
+    buffer[echolen] = '\0';
+    printf("Server response: %s\n", buffer);
+  }
+
   close(sock);
   exit(0);
-       }
+}
