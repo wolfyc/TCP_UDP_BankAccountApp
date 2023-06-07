@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   memset(&echoserver, 0, sizeof(echoserver)); /* Clear struct */
   echoserver.sin_family = AF_INET;            /* Internet/IP */
   echoserver.sin_addr.s_addr = INADDR_ANY;    /* Incoming addr */
-  echoserver.sin_port = htons(port);          /* Server port */
+  echoserver.sin_port = htons(PORT);          /* Server port */
 
   /* Bind the server socket */
   if (bind(serversock, (struct sockaddr *)&echoserver, sizeof(echoserver)) < 0)
@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
           token = strtok(NULL, " ");
           amount = atoi(token);
 
-          if (AJOUT(id_client, id_account, password, amount))
-            strcpy(answer, "OK\n");
+          if (AJOUT(id_client, id_account, password, amount) == 1)
+            strcpy(answer, "OoooK\n");
           else
             strcpy(answer, "KO\n");
         }
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
           token = strtok(NULL, " ");
           password = token;
           token = strtok(NULL, " ");
-          amount = strtod(token, NULL);
+          amount = atoi(token);
 
-          if (RETRAIT(id_client, id_account, password, amount))
+          if (RETRAIT(id_client, id_account, password, amount) == 1)
             strcpy(answer, "OK\n");
           else
             strcpy(answer, "KO\n");
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
           if (resultArray)
           {
-            snprintf(answer, BUFFSIZE, "List of past 10 operations:%s\n", resultArray);
+            snprintf(answer, BUFFSIZE, "List of past 10 operations:\n%s\n", resultArray);
           }
           else
             strcpy(answer, "KO\n");
@@ -132,16 +132,18 @@ int main(int argc, char *argv[])
         else
           strcpy(answer, "KO\n");
       }
-
+      printf("sent messageé");
       /* Send back the response */
+      //*
       int bytes_sent = sendto(serversock, answer, strlen(answer), 0, (struct sockaddr *)&echoclient, clientlen);
+      
       if (bytes_sent < 0)
       {
         Die("Failed to send response to client");
       }
-
+      //*/
     } while (do_while_flag);
   }
 
-  return 1;
+  return 0;
 }
