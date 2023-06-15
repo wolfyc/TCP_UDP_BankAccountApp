@@ -1,43 +1,36 @@
 #include "header.h"
 
-int main(int argc, char *argv[])
+int main()
 {
   int serversock;
   char buffer[BUFFSIZE];
   struct sockaddr_in echoserver, echoclient;
-  Account test = account_db[0];
 
-  /* Create the UDP socket */
+
+  /* Crée le socket UDP */
   if ((serversock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
   {
-    Die("Failed to create socket");
+    Die("Échec de la création du socket");
   }
 
-  /* Construct the server sockaddr_in structure */
-  memset(&echoserver, 0, sizeof(echoserver)); /* Clear struct */
+  /* Construit la structure sockaddr_in du serveur */
+  memset(&echoserver, 0, sizeof(echoserver)); /* Efface la structure */
   echoserver.sin_family = AF_INET;            /* Internet/IP */
-  echoserver.sin_addr.s_addr = INADDR_ANY;    /* Incoming addr */
-  echoserver.sin_port = htons(PORT);          /* Server port */
+  echoserver.sin_addr.s_addr = INADDR_ANY;    /* Adresse entrante */
+  echoserver.sin_port = htons(PORT);          /* Port du serveur */
 
-  /* Bind the server socket */
+  /* Lie le socket du serveur */
   if (bind(serversock, (struct sockaddr *)&echoserver, sizeof(echoserver)) < 0)
   {
-    Die("Failed to bind the server socket");
+    Die("Échec de la liaison du socket du serveur");
   }
 
   unsigned int clientlen = sizeof(echoclient);
 
-  /* Run until cancelled */
+  /* S'exécute jusqu'à annulation */
   while (1)
   {
-    /* Receive client request */
-    int bytes_received = recvfrom(serversock, buffer, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen);
-    if (bytes_received < 0)
-    {
-      Die("Failed to receive client request");
-    }
-
-    fprintf(stdout, "Client connected: %s\nWaiting for instructions from client\n", inet_ntoa(echoclient.sin_addr));
+    fprintf(stdout, "En attente d'instructions du client\n");
 
     int id_client, id_account;
     const char *password;
@@ -47,16 +40,23 @@ int main(int argc, char *argv[])
 
     do
     {
+      int bytes_received = recvfrom(serversock, buffer, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen);
+      if (bytes_received < 0)
+      {
+        Die("Échec de la réception de la demande du client");
+        do_while_flag = 0;
+      }
+
       buffer[bytes_received] = '\0';
 
-      char *token = strtok(buffer, " ");
 
+      char *token = strtok(buffer, " ");
       if (token != NULL)
       {
         if (strcmp(token, "KILL") == 0)
         {
           do_while_flag = 0;
-          printf("client request KILLed\n");
+          printf("Demande KILLée\n");
         }
         else if (strcmp(token, "AJOUT") == 0)
         {
@@ -70,9 +70,11 @@ int main(int argc, char *argv[])
           amount = atoi(token);
 
           if (AJOUT(id_client, id_account, password, amount) == 1)
-            strcpy(answer, "OoooK\n");
+            strcpy(answer, "AJOUT OK\n");
+
           else
-            strcpy(answer, "KO\n");
+            strcpy(answer, "KO AJOUT\n");
+          printf("Opération AJOUT\n");
         }
         else if (strcmp(token, "RETRAIT") == 0)
         {
@@ -86,9 +88,11 @@ int main(int argc, char *argv[])
           amount = atoi(token);
 
           if (RETRAIT(id_client, id_account, password, amount) == 1)
-            strcpy(answer, "OK\n");
+            strcpy(answer, "RETRAIT OK\n");
+
           else
-            strcpy(answer, "KO\n");
+            strcpy(answer, "KO RETRAIT\n");
+          printf("Opération RETRAIT\n");
         }
         else if (strcmp(token, "SOLDE") == 0)
         {
@@ -105,10 +109,11 @@ int main(int argc, char *argv[])
 
           if (account_balance >= 0)
           {
-            snprintf(answer, BUFFSIZE, "your account balance is: %d Euro\n", account_balance);
+            snprintf(answer, BUFFSIZE, "Votre solde est de : %d euros\n", account_balance);
           }
           else
-            strcpy(answer, "KO\n");
+            strcpy(answer, "KO SOLDE\n");
+          printf("Opération SOLDE\n");
         }
         else if (strcmp(token, "OPERATIONS") == 0)
         {
@@ -124,24 +129,23 @@ int main(int argc, char *argv[])
 
           if (resultArray)
           {
-            snprintf(answer, BUFFSIZE, "List of past 10 operations:\n%s\n", resultArray);
+            snprintf(answer, BUFFSIZE, "Liste des 10 dernières opérations :\n%s\n", resultArray);
           }
           else
-            strcpy(answer, "KO\n");
+            strcpy(answer, "KO OPERATIONS\n");
+          printf("Opération OPERATIONS\n");
         }
         else
-          strcpy(answer, "KO\n");
+          strcpy(answer, "Opération/demande inconnue\n");
       }
-      printf("sent messageé");
-      /* Send back the response */
-      //*
+
       int bytes_sent = sendto(serversock, answer, strlen(answer), 0, (struct sockaddr *)&echoclient, clientlen);
-      
+
       if (bytes_sent < 0)
       {
-        Die("Failed to send response to client");
+        Die("Échec de l'envoi de la réponse au client");
       }
-      //*/
+      printf("En attente d'une nouvelle demande si disponible\n");
     } while (do_while_flag);
   }
 

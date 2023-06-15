@@ -10,58 +10,103 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-#define MAXPENDING 5    /* Max connection requests */
+#define MAXPENDING 5    /* Max demande de connexion */
 #define BUFFSIZE 1024
 #define PORT 8081
 
 typedef struct operations_ {
-    char type_operation[10];
-    char date_operation[20];
-    int operation_amount;
+    char type_operation[10];       // Type d'opération (AJOUT, RETRAIT)
+    char date_operation[20];       // Date et heure de l'opération
+    int operation_amount;          // Montant de l'opération
 } Operations;
 
 typedef struct account_ {
-    int id_client;
-    int id_account;
-    char password[32];
-    int balance;
-    Operations operations[10];
-    int operation_count;
+    int id_client;                 // ID du client
+    int id_account;                // ID du compte
+    char password[32];             // Mot de passe du compte
+    int balance;                   // Solde du compte
+    Operations operations[10];     // Tableau des 10 dernières opérations
+    int operation_count;           // Nombre total d'opérations effectuées
 } Account;
 
 Account account_db[] = {
-    {1, 1, "p1", 5000, {{"", "", 0}}, 0},
-    {2, 2, "p2", 3000, {{"", "", 0}}, 0},
-    {3, 3, "p", 3999, {{"", "", 0}}, 0}
+    {1, 11, "p1", 5000, {{"", "", 0}}, 0},   // Compte 1
+    {2, 21, "p2", 3000, {{"", "", 0}}, 0},   // Compte 2
+    {3, 31, "p3", 3999, {{"", "", 0}}, 0}    // Compte 3
 };
 
 int account_db_size = sizeof(account_db) / sizeof(account_db[0]);
 
 void save_operation(Account *account, const char *type_operation, int amount);
 Account* find_account_by_ID(int id_client, int id_account, const char *password);
+/** Enregistre une opération dans le tableau des opérations d'un compte
+  *
+  * @param *account pointeur vers la structure du compte
+  * @param *type_operation pointeur vers une chaîne de caractères décrivant l'opération
+  * @param amount entier représentant le montant de la transaction
+  * @return void
+  */
+void save_operation(Account *account, const char *type_operation, int amount);
+
+/** Recherche un compte en faisant correspondre ses identifiants et son mot de passe
+  *
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @return un pointeur vers une structure Account
+  */
+Account* find_account_by_ID(int id_client, int id_account, const char *password);
+
+/** Ajoute un montant au solde du compte
+  *
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @param amount entier représentant le montant à ajouter au solde
+  * @return 1 en cas de succès, -1 en cas d'échec
+  */
 int AJOUT(int id_client, int id_account, const char *password, int amount);
+
+/** Retire un montant spécifique du solde du compte
+  *
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @param amount entier représentant le montant à retirer du solde
+  * @return 1 en cas de succès, -1 en cas d'échec
+  */
 int RETRAIT(int id_client, int id_account, const char *password, int amount);
+
+/** Renvoie le solde du compte
+  *
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @return le solde en cas de succès, -1 en cas d'échec
+  */
 int SOLDE(int id_client, int id_account, const char *password);
-char* OPERATIONS(int id_client, int id_account, const char *password, char *buffer, size_t buffer_size);
+
+/** Renvoie l'historique des opérations du compte (les 10 dernières opérations)
+  *
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @param buffer chaîne de caractères pour enregistrer les 10 opérations du compte
+  * @param buffer_size entier pour la taille du buffer
+  * @return le buffer contenant les 10 dernières opérations en cas de succès, NULL en cas d'échec
+  */
+char *OPERATIONS(int id_client, int id_account, const char *password, char *buffer, size_t buffer_size);
+
 void Die(char *mess);
-void HandleClient(int sock);
 
 void save_operation(Account *account, const char *type_operation, int amount) {
-    printf("save operation 1\n");
     Operations *operation = &(account->operations[account->operation_count % 10]);
-    printf("save operation 2\n");
     strncpy(operation->type_operation, type_operation, sizeof(operation->type_operation) - 1);
-    printf("save operation 3\n");
     operation->type_operation[sizeof(operation->type_operation) - 1] = '\0';
-    printf("save operation 4\n");
     time_t current_time = time(NULL);
-    printf("save operation 5\n");
     strftime(operation->date_operation, sizeof(operation->date_operation), "%Y-%m-%d %H:%M:%S", localtime(&current_time));
-    printf("save operation 6\n");
     operation->operation_amount = amount;
-    printf("save operation 7\n");
     account->operation_count++;
-    printf("save operation 8\n");
 }
 
 Account* find_account_by_ID(int id_client, int id_account, const char *password) {
@@ -78,13 +123,10 @@ int AJOUT(int id_client, int id_account, const char *password, int amount) {
     Account *account = find_account_by_ID(id_client, id_account, password);
     if (account) {
         account->balance += amount;
-        printf("save operation %d \n",account->balance);
         save_operation(account, "AJOUT", amount);
-        printf("save operation\n");
-        return 1;
-        printf("save operation\n");
+        return 1;  // Succès de l'opération
     }
-    return -1;
+    return -1;     // Échec de l'opération
 }
 
 int RETRAIT(int id_client, int id_account, const char *password, int amount) {
@@ -92,9 +134,9 @@ int RETRAIT(int id_client, int id_account, const char *password, int amount) {
     if (account && account->balance >= amount) {
         account->balance -= amount;
         save_operation(account, "RETRAIT", amount);
-        return 1;
+        return 1;  // Succès de l'opération
     }
-    return -1;
+    return -1;     // Échec de l'opération
 }
 
 int SOLDE(int id_client, int id_account, const char *password) {
@@ -102,7 +144,7 @@ int SOLDE(int id_client, int id_account, const char *password) {
     if (account) {
         return account->balance;
     }
-    return -1;
+    return -1;     // Échec de l'opération
 }
 
 char* OPERATIONS(int id_client, int id_account, const char *password, char *buffer, size_t buffer_size) {
@@ -129,31 +171,6 @@ char* OPERATIONS(int id_client, int id_account, const char *password, char *buff
 void Die(char *mess) {
     perror(mess);
     exit(1);
-}
-
-void HandleClient(int sock) {
-    char buffer[BUFFSIZE];
-    int received = -1;
-    char *message_client = "\nServer status READY";
-    
-    if ((received = recv(sock, buffer, BUFFSIZE, 0)) < 0) {
-        Die("Failed to receive initial bytes from client");
-    }
-    printf("Received message: %s\n", buffer);
-    
-    while (received > 0) {
-        if (send(sock, buffer, received, 0) != received) {
-            Die("Failed to send bytes to client");
-        }
-        buffer[received] = '\0';
-        printf("Sent message back: %s\n", buffer);
-        
-        if ((received = recv(sock, buffer, BUFFSIZE, 0)) < 0) {
-            Die("Failed to receive additional bytes from client");
-        }
-    }
-    
-    close(sock);
 }
 
 #endif // HEADER_H

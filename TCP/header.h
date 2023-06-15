@@ -37,63 +37,74 @@ Account account_db[] = {
 };
 int account_db_nbr = sizeof(account_db) / sizeof(account_db[0]);
 
-/**Saves operations for each account
+/** Enregistre une opération dans le tableau des opérations d'un compte
   *
-  * @param *account pointer to the account structure
-  * @param *type_operations pointer to a string describing operations
-  * @param amount integer representing the amount of the transaction
+  * @param *account pointeur vers la structure du compte
+  * @param *type_operation pointeur vers une chaîne de caractères décrivant l'opération
+  * @param amount entier représentant le montant de la transaction
   * @return void
   */
 void save_operation(Account *account, const char *type_operation, int amount);
 
-/**Searches for the account by matching its ids and password
+/** Recherche un compte en faisant correspondre ses identifiants et son mot de passe
   *
-  * @param id_client integer for client ID
-  * @param id_account integer for account ID
-  * @param *password string for password
-  * @return a pointer to an Account type
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @return un pointeur vers une structure Account
   */
-Account* find_accound_by_ID(int id_client, int id_account, const char *password);
-/**Adds an amount to the account balance
+Account* find_account_by_ID(int id_client, int id_account, const char *password);
+
+/** Ajoute un montant au solde du compte
   *
-  * @param id_client integer for client ID
-  * @param id_account integer for account ID
-  * @param *password string for password
-  * @param amount integer value of the amount to be added to the balance
-  * @return 1 for success, -1 for failure
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @param amount entier représentant le montant à ajouter au solde
+  * @return 1 en cas de succès, -1 en cas d'échec
   */
 int AJOUT(int id_client, int id_account, const char *password, int amount);
-/**Substracts a specific amount from the account balance
+
+/** Retire un montant spécifique du solde du compte
   *
-  * @param id_client integer for client ID
-  * @param id_account integer for account ID
-  * @param *password string for password
-  * @param amount integer value of the amount to be substracted to the balance
-  * @return 1 for success, -1 for failure
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @param amount entier représentant le montant à retirer du solde
+  * @return 1 en cas de succès, -1 en cas d'échec
   */
 int RETRAIT(int id_client, int id_account, const char *password, int amount);
-/**sends back the balance of the account
+
+/** Renvoie le solde du compte
   *
-  * @param id_client integer for client ID
-  * @param id_account integer for account ID
-  * @param *password string for password
-  * @return the balance if successful, -1 for failure
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @return le solde en cas de succès, -1 en cas d'échec
   */
 int SOLDE(int id_client, int id_account, const char *password);
-/**sends back the history of the account "the last 10 operations of the account"
+
+/** Renvoie l'historique des opérations du compte (les 10 dernières opérations)
   *
-  * @param id_client integer for client ID
-  * @param id_account integer for account ID
-  * @param *password string for password
-  * @param buffer string for saving the 10 operations of the account
-  * @param buffer_size integer for the buffer size
-  * @return the buffer for 10 operations string if successful, NULL for failure
+  * @param id_client entier pour l'ID du client
+  * @param id_account entier pour l'ID du compte
+  * @param *password pointeur vers le mot de passe
+  * @param buffer chaîne de caractères pour enregistrer les 10 opérations du compte
+  * @param buffer_size entier pour la taille du buffer
+  * @return le buffer contenant les 10 dernières opérations en cas de succès, NULL en cas d'échec
   */
 char *OPERATIONS(int id_client, int id_account, const char *password, char *buffer, size_t buffer_size);
 
+/** Gère la communication avec un client connecté au socket
+  *
+  * @param sock entier représentant le descripteur de socket
+  * @return void
+  */
+void HandleClient(int sock);
+
 void Die(char *mess);
 
-void HandleClient(int sock);
+
 
 void save_operation(Account* account, const char* type_operation, int amount) {
     Operations* operation = &(account->operations[account->Operation_nbr % 10]);
