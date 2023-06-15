@@ -56,7 +56,7 @@ int main()
         if (strcmp(token, "KILL") == 0)
         {
           do_while_flag = 0;
-          printf("Demande KILLée\n");
+          printf("Demande KILLed\n");
         }
         else if (strcmp(token, "AJOUT") == 0)
         {
@@ -136,7 +136,10 @@ int main()
           printf("Opération OPERATIONS\n");
         }
         else
-          strcpy(answer, "Opération/demande inconnue\n");
+          {
+            strcpy(answer, "Opération/demande inconnue\n");
+            printf("Opération/demande inconnue\n");
+          }
       }
 
       int bytes_sent = sendto(serversock, answer, strlen(answer), 0, (struct sockaddr *)&echoclient, clientlen);

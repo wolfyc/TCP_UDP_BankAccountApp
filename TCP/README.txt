@@ -1,4 +1,4 @@
-Project Name: UDP Client-Server Communication
+Project Name: TCP Client-Server Communication
 
 Author: ZAIDI Mohamed & YANNIS MRAIHI
 
@@ -9,7 +9,13 @@ Version: 2.0
 ----------------------------------------------------
 DESCRIPTION
 
-This project demonstrates a client-server communication using UDP (User Datagram Protocol). The server and client programs are implemented in C language. The server program listens for client requests, performs specific operations based on the request, and sends a response back to the client. The client program allows users to send requests to the server and display the server's response.
+This project demonstrates a client-server communication 
+using TCP (transmission Control Protocol). The server and 
+client programs are implemented in C language. The server 
+program listens for client requests, performs specific 
+operations based on the request, and sends a response 
+back to the client. The client program allows users 
+to send requests to the server and display the server's response.
 
 ----------------------------------------------------
 REQUIREMENTS
@@ -17,15 +23,16 @@ REQUIREMENTS
 To compile and run this project, you need:
 
 1. C Compiler (e.g., GCC)
-2. Unix-like operating system (Linux, macOS) or a compatible environment (e.g., Cygwin on Windows)
+2. Unix-like operating system (Linux, macOS) or a compatible environment 
+(e.g., Cygwin on Windows)
 
 ----------------------------------------------------
 FILES
 
 The project consists of the following files:
 
-1. server_udp.c - Contains the implementation of the server program
-2. client_udp.c - Contains the implementation of the client program
+1. server_tcp.c - Contains the implementation of the server program
+2. client_tcp.c - Contains the implementation of the client program
 3. header.h - Header file containing function prototypes and necessary includes for the server and client programs
 
 ----------------------------------------------------
@@ -37,9 +44,9 @@ Run the MAKE commande on your terminal or Follow these steps to compile the proj
 1. Open a terminal or command prompt.
 2. Navigate to the project directory.
 3. Compile the server program by executing the following command:
-     gcc server_udp.c -o server
+     gcc server_tcp.c -o server
 4. Compile the client program by executing the following command:
-     gcc client_udp.c -o client
+     gcc client_tcp.c -o client
 
 ----------------------------------------------------
 RUNNING THE PROJECT
@@ -70,10 +77,10 @@ The client program supports the following requests:
 2. RETRAIT <id_client> <id_compte> <password> <amount>
    - Withdraws the specified amount from the account identified by the client ID and account ID.
 
-3. SOLDE <id_client> <id_compte> <password>
+3. SOLDE <id_client> <id_compte> <password>+" " //space
    - Retrieves the balance of the account identified by the client ID and account ID.
 
-4. OPERATIONS <id_client> <id_compte> <password>
+4. OPERATIONS <id_client> <id_compte> <password>+" " //space
    - Retrieves the list of the last 10 operations performed on the account identified by the client ID and account ID.
 
 Note: Replace <id_client>, <id_compte>, <password>, and <amount> with the actual values when sending requests.

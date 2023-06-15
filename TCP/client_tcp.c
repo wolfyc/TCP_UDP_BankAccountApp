@@ -6,50 +6,54 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-#define port 8081
+#define PORT 8084
 #define BUFFSIZE 1024
 
 void Die(char *mess) { perror(mess); exit(1); }
 
-int main(int argc, char *argv[]) {
+int main() {
   int sock;
   struct sockaddr_in echoserver;
   char buffer[BUFFSIZE];
   unsigned int echolen;
-  int received = 0;
-// Human interface information
-  char *AJOUT = "AJOUT  <id_client  id_account  password  amount>";
-  char *RETRAIT = "RETRAIT <id_client id_account password amount>";
-  char *SOLDE = "SOLDE <id_client id_account password+space >";
-  char *OPERATIONS = "OPERATIONS <id_client  id_account  password+space>";
-  char *hello = "Hello from client !";
+  
+  // Informations d'interface utilisateur
+  char *AJOUT = "AJOUT  <id_client  id_account  password  montant>";
+  char *RETRAIT = "RETRAIT <id_client id_account password montant>";
+  char *SOLDE = "SOLDE <id_client id_account password+espace>";
+  char *OPERATIONS = "OPERATIONS <id_client  id_account  password+espace>";
+  
 
-  /* Create the TCP socket */
+  /* Créer la socket TCP */
   if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    Die("Failed to create socket");
+    Die("Échec de création de la socket");
   }
-  /* Construct the server sockaddr_in structure */
-  memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
+
+  /* Construire la structure sockaddr_in du serveur */
+  memset(&echoserver, 0, sizeof(echoserver));       /* Effacer la structure */
   echoserver.sin_family = AF_INET;      /* Internet/IP */
-  echoserver.sin_addr.s_addr = INADDR_ANY;//inet_addr(argv[1]);  /* IP address */
-  echoserver.sin_port = htons(port);       /* server port */
-  /* Establish connection */
+  echoserver.sin_addr.s_addr = INADDR_ANY;  /* Adresse IP */
+  echoserver.sin_port = htons(PORT);       /* Port du serveur */
+
+  /* Établir la connexion */
   if (connect(sock,(struct sockaddr *) &echoserver,sizeof(echoserver)) < 0) {
-    Die("Failed to connect with server");
+    Die("Échec de connexion avec le serveur");
   }
-  /*Human interface*/
-  printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre account : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernieres operations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
+
+  /* Interface utilisateur */
+  printf("Bonjour, voici les requêtes disponibles :\nAjouter de l'argent à votre compte : %s\nRetirer de l'argent : %s\nAfficher votre solde : %s\nAfficher les 10 dernières opérations : %s\n", AJOUT, RETRAIT, SOLDE, OPERATIONS);
 
   while (1) {
-        printf("\nEnter your request, and please mind the syntaxe above \n");
+        printf("\nEntrez votre requête en respectant la syntaxe ci-dessus :\n");
         fgets(buffer, BUFFSIZE, stdin);
         send(sock, buffer, strlen(buffer), 0);
-        printf("Request sent\n");
+        printf("Requête envoyée\n");
         
         echolen = read(sock, buffer, BUFFSIZE);
-        buffer [echolen ] = '\0';
-        printf("server response %s\n", buffer);
+        buffer[echolen] = '\0';
+        printf("Réponse du serveur : %s\n", buffer);
     }
+
   close(sock);
   exit(0);
-       }
+}
